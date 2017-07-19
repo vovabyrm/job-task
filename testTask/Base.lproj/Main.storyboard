@@ -10,7 +10,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Root View Controller-->
+        <!--Tech-->
         <scene sceneID="9ky-Mp-MBX">
             <objects>
                 <tableViewController id="aoF-XR-MOr" customClass="PostsTableViewController" customModule="testTask" customModuleProvider="target" sceneMemberID="viewController">
@@ -81,14 +81,43 @@
                             <outlet property="delegate" destination="aoF-XR-MOr" id="Xds-AK-d1D"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Root View Controller" id="vof-6p-S0D"/>
+                    <navigationItem key="navigationItem" title="Tech" id="vof-6p-S0D"/>
                     <connections>
                         <segue destination="Ukd-iz-qZc" kind="show" identifier="showPost" id="3ya-n9-0lQ"/>
+                        <segue destination="XOH-aG-5Gg" kind="presentation" identifier="showCatigories" id="zuv-yR-rZ7"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="afT-Fg-KXB" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="504.80000000000001" y="-17.541229385307346"/>
+        </scene>
+        <!--Categories Table View Controller-->
+        <scene sceneID="iXd-9Z-ILt">
+            <objects>
+                <tableViewController automaticallyAdjustsScrollViewInsets="NO" id="XOH-aG-5Gg" customClass="CategoriesTableViewController" customModule="testTask" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="Y0E-Lf-ghp">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="titleCell" id="54K-ph-lhH">
+                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="54K-ph-lhH" id="2l4-Ch-dxF">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="XOH-aG-5Gg" id="Lwj-dd-Ooo"/>
+                            <outlet property="delegate" destination="XOH-aG-5Gg" id="dSl-wD-V0m"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1YZ-pY-g4y" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="505" y="868"/>
         </scene>
         <!--Post Page View Controller-->
         <scene sceneID="ypO-eC-Jy9">

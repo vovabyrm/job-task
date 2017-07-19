@@ -20,8 +20,8 @@ class PostPageViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setupView()
-        // Do any additional setup after loading the view.
     }
 
     override func didReceiveMemoryWarning() {
@@ -30,13 +30,15 @@ class PostPageViewController: UIViewController {
     }
     
     @IBAction func getAction(_ sender: Any) {
-        self.view.layoutIfNeeded()
+        UIApplication.shared.open(post!.openURL!, options: [:], completionHandler: nil)
     }
     
     func setupView() {
         self.titleLabel.text = post?.name
         self.descriptionLabel.text = post?.description
         self.upvotesLabel.text = "▲ \(post!.votesCount)"
+        
+        //TODO Add blank image
         
         URLSession.shared.dataTask(with: post!.screenshotURL!) { (data, response, error) in
             guard let httpURLResponse = response as? HTTPURLResponse, httpURLResponse.statusCode == 200,
@@ -46,19 +48,8 @@ class PostPageViewController: UIViewController {
                 else { return }
             DispatchQueue.main.async() { () -> Void in
                 self.sreenshotImageView.image = image
-                self.view.layoutIfNeeded()
             }
             }.resume()
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }

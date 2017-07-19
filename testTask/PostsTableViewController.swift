@@ -9,46 +9,62 @@
 import UIKit
 import SwiftyJSON
 
-class PostsTableViewController: UITableViewController {
+class PostsTableViewController: UITableViewController, CategoriesTableViewControllerDelegate {
     
     let cellReuseID = "cellid"
-    var postsArray : [PHPost] = []
-    var cache = ImageLoadingWithCache()
+    var postsArray = [PHPost]()
+    var imageCache = [URL:UIImage]()
     var passPost : PHPost?
+    var categories = [PHCategory]()
+    var category = PHCategory(name: "Tech", slug: "tech")
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
-        //self.refreshControl.
+        
         refreshControl = UIRefreshControl()
         self.refreshControl?.addTarget(self, action: #selector(refresh), for: UIControlEvents.valueChanged)
         tableView.addSubview(refreshControl!)
         
-        testAPI()
+        //navBar button setup
+        let button =  UIButton(type: .custom)
+        button.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
+        button.setTitle(category.name, for: .normal)
+        button.setTitleColor(UIColor.black, for: .normal)
+        button.setTitleColor(UIColor.gray, for: .highlighted)
+        button.addTarget(self, action: #selector(self.clickOnButton), for: .touchUpInside)
+        self.navigationItem.titleView = button
+        
+        getCatigories()
+        getPostForCategory(category.slug)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        
+        self.imageCache.removeAll()
+    }
+    
+    func refresh() {
+        getPostForCategory(category.slug)
+        self.refreshControl?.endRefreshing()
+    }
+    
+    func clickOnButton(button: UIButton) {
+        if categories.count > 0 {
+            performSegue(withIdentifier: "showCatigories", sender: self)
+        }
+    }
+    
+    func categoryChanged(category: PHCategory) {
+        (self.navigationItem.titleView as! UIButton).setTitle(category.name, for: .normal)
+        self.category = category
+        self.refresh()
     }
     
     // MARK: - API
     
-    func refresh() {
-        testAPI()
-        self.refreshControl?.endRefreshing()
-    }
-    
-    func testAPI() { //TODO Create class for API
-        let url = URL(string: "https://api.producthunt.com/v1/categories/tech/posts")
-        
-        //let parameterString = parameters.stringFromHttpParameters()
-        //let requestURL = URL(string:"\(url)?\(parameterString)")!
+    func getPostForCategory(_ cat: String) {
+        let url = URL(string: "https://api.producthunt.com/v1/categories/\(cat)/posts")
         
         var array : [PHPost] = []
         
@@ -71,9 +87,38 @@ class PostsTableViewController: UITableViewController {
             }
             print(error ?? "no error")
             DispatchQueue.main.async {
-                //self.inserNewRows()
                 self.postsArray = array
                 self.tableView.reloadData()
+            }
+        }
+        task.resume()
+    }
+    
+    func getCatigories() {
+        self.categories.removeAll()
+        let url = URL(string: "https://api.producthunt.com/v1/categories")
+        
+        var request = URLRequest(url: url!)
+        request.httpMethod = "GET"
+        
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer 591f99547f569b05ba7d8777e2e0824eea16c440292cce1f8dfb3952cc9937ff",
+                         forHTTPHeaderField: "Authorization")
+        request.setValue("api.producthunt.com", forHTTPHeaderField: "Host")
+        
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+            if data != nil {
+                let json = JSON(data!)
+                //print(json["posts"].arrayValue)
+                for post in json["categories"].arrayValue {
+                    print(post["name"].stringValue)
+                    self.categories.append(PHCategory(response: post))
+                }
+            }
+            print(error ?? "no error")
+            DispatchQueue.main.async {
+
             }
         }
         task.resume()
@@ -94,40 +139,32 @@ class PostsTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseID, for: indexPath) as! PHPostCell
         cell.post = postsArray[indexPath.row]
         
-        // Configure the cell...
-        //let string = String(describing: postsArray[indexPath.row].thumbnailURL!)
-        
-        //TODO add cashing, gif support would be fine too
-        URLSession.shared.dataTask(with: cell.post!.thumbnailURL!) { (data, response, error) in
-            guard let httpURLResponse = response as? HTTPURLResponse, httpURLResponse.statusCode == 200,
-                let mimeType = response?.mimeType, mimeType.hasPrefix("image"),
-                let data = data, error == nil,
-                let image = UIImage(data: data)
-                else { return }
-            DispatchQueue.main.async() { () -> Void in
-                if self.tableView.cellForRow(at: indexPath) != nil {
-                    cell.thumbnailView.image = image
+        //TODO gif support would be fine too
+        if let img = imageCache[cell.post!.thumbnailURL!] {
+            
+            cell.thumbnailView.image = img
+            
+        } else {
+            
+            URLSession.shared.dataTask(with: cell.post!.thumbnailURL!) { (data, response, error) in
+                var image = UIImage()
+                
+                if error == nil && data != nil {
+                    image = UIImage(data: data!)!
+                    self.imageCache[cell.post!.thumbnailURL!] = image
+                } else {
+                    print(error?.localizedDescription ?? "Error")
                 }
-                //self.avatarsCahse[(cell.data?.peerID) ?? "nil"] = image
-            }
-            }.resume()
-        
-        //cache.getImage(url: string, imageView: cell.thumbnailView, defaultImage: "blank")
-        
-        
-        return cell
-    }
-    
-    func inserNewRows() {
-        var paths : [IndexPath] = []
-        for i in 0..<postsArray.count {
-            paths.append(IndexPath(row: i, section: 0))
+                
+                DispatchQueue.main.async() { () -> Void in
+                    if self.tableView.cellForRow(at: indexPath) != nil {
+                        cell.thumbnailView.image = image
+                    }
+                }
+                }.resume()
         }
         
-        self.tableView.beginUpdates()
-        self.tableView.insertRows(at: paths, with: .none)
-        self.tableView.endUpdates()
-        
+        return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -138,15 +175,20 @@ class PostsTableViewController: UITableViewController {
     
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-        let vc = segue.destination as! PostPageViewController
-        vc.post = self.passPost
+        if segue.identifier == "showCatigories" {
+            let vc = segue.destination as! CategoriesTableViewController
+            vc.categories = self.categories
+            vc.delegate = self
+        } else {
+            let vc = segue.destination as! PostPageViewController
+            vc.post = self.passPost
+        }
     }
     
 }
+
+    // MARK: - CellClass
 
 class PHPostCell: UITableViewCell {
     @IBOutlet var titleLabel: UILabel!
@@ -166,30 +208,3 @@ class PHPostCell: UITableViewCell {
     }
 }
 
-class ImageLoadingWithCache {
-    
-    var imageCache = [String:UIImage]()
-    
-    func getImage(url: String, imageView: UIImageView, defaultImage: String) {
-        if let img = imageCache[url] {
-            imageView.image = img
-        } else {
-            let request: URLRequest = URLRequest(url: URL(string: url)!)
-            let mainQueue = OperationQueue.main
-            
-            NSURLConnection.sendAsynchronousRequest(request, queue: mainQueue, completionHandler: { (response, data, error) -> Void in
-                if error == nil {
-                    let image = UIImage(data: data!)
-                    self.imageCache[url] = image
-                    
-                    DispatchQueue.main.async(execute: {
-                        imageView.image = image
-                    })
-                }
-                else {
-                    imageView.image = UIImage(named: defaultImage)
-                }
-            })
-        }
-    }
-}
