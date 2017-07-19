@@ -6,7 +6,6 @@
 //  Copyright © 2017 Vladimir Burmistrov. All rights reserved.
 //
 
-import Foundation
 import SwiftyJSON
 
 class PHCategory {

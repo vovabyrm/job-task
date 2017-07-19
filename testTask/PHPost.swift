@@ -6,8 +6,6 @@
 //  Copyright © 2017 Vladimir Burmistrov. All rights reserved.
 //
 
-import Foundation
-import UIKit
 import SwiftyJSON
 
 class PHPost {
@@ -16,7 +14,7 @@ class PHPost {
     var screenshotURL : URL? //screenshot_url -> 300px(850px)
     var openURL : URL? //redirect_url
     var votesCount : Int //votes_count
-    var description : String //tagLine
+    var description : String //tagline
     
     init(response : JSON) {
         self.name = response["name"].stringValue

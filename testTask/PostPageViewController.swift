@@ -14,7 +14,8 @@ class PostPageViewController: UIViewController {
     @IBOutlet var descriptionLabel: UILabel!
     @IBOutlet var sreenshotImageView: UIImageView!
     @IBOutlet var upvotesLabel: UILabel!
-    @IBOutlet var getButton: UIButton!
+    @IBOutlet var buttonView: UIView!
+    @IBOutlet var upvotesView: UIView!
     
     var post : PHPost?
 
@@ -34,18 +35,22 @@ class PostPageViewController: UIViewController {
     }
     
     func setupView() {
-        self.titleLabel.text = post?.name
-        self.descriptionLabel.text = post?.description
-        self.upvotesLabel.text = "▲ \(post!.votesCount)"
+        buttonView.layer.cornerRadius = 5
+        upvotesView.layer.cornerRadius = 5
+        titleLabel.text = post?.name
+        descriptionLabel.text = post?.description
+        upvotesLabel.text = "▲ \(post!.votesCount)"
         
-        //TODO Add blank image
+        self.sreenshotImageView.image = UIImage(named: "blankScreenshot")
         
         URLSession.shared.dataTask(with: post!.screenshotURL!) { (data, response, error) in
-            guard let httpURLResponse = response as? HTTPURLResponse, httpURLResponse.statusCode == 200,
-                let mimeType = response?.mimeType, mimeType.hasPrefix("image"),
-                let data = data, error == nil,
-                let image = UIImage(data: data)
-                else { return }
+            var image = UIImage()
+            
+            if error == nil && data != nil {
+                image = UIImage(data: data!)!
+            } else {
+                print(error?.localizedDescription ?? "Error")
+            }
             DispatchQueue.main.async() { () -> Void in
                 self.sreenshotImageView.image = image
             }

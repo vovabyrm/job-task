@@ -17,6 +17,7 @@
 		620CCD311F1ED01500139915 /* PostPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 620CCD301F1ED01500139915 /* PostPageViewController.swift */; };
 		620CCD351F1F7F8800139915 /* PHCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 620CCD341F1F7F8800139915 /* PHCategory.swift */; };
 		620CCD371F1F842800139915 /* CategoriesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 620CCD361F1F842800139915 /* CategoriesTableViewController.swift */; };
+		629671501F1FAA5300508080 /* GIF.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6296714F1F1FAA5300508080 /* GIF.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		620CCD301F1ED01500139915 /* PostPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPageViewController.swift; sourceTree = "<group>"; };
 		620CCD341F1F7F8800139915 /* PHCategory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PHCategory.swift; sourceTree = "<group>"; };
 		620CCD361F1F842800139915 /* CategoriesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoriesTableViewController.swift; sourceTree = "<group>"; };
+		6296714F1F1FAA5300508080 /* GIF.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GIF.swift; sourceTree = "<group>"; };
 		ED339598392AC258270CA45A /* Pods_testTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_testTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFFFEB9FACD2BB214D28AFF1 /* Pods-testTask.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-testTask.debug.xcconfig"; path = "Pods/Target Support Files/Pods-testTask/Pods-testTask.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -79,11 +81,10 @@
 			isa = PBXGroup;
 			children = (
 				620CCD181F1E29CD00139915 /* AppDelegate.swift */,
+				6296714F1F1FAA5300508080 /* GIF.swift */,
 				620CCD391F1F951700139915 /* Controllers */,
-				620CCD1C1F1E29CD00139915 /* Main.storyboard */,
 				620CCD381F1F94FB00139915 /* Models */,
-				620CCD1F1F1E29CD00139915 /* Assets.xcassets */,
-				620CCD211F1E29CD00139915 /* LaunchScreen.storyboard */,
+				620CCD3A1F1F962700139915 /* Views */,
 				620CCD241F1E29CD00139915 /* Info.plist */,
 			);
 			path = testTask;
@@ -106,6 +107,16 @@
 				620CCD301F1ED01500139915 /* PostPageViewController.swift */,
 			);
 			name = Controllers;
+			sourceTree = "<group>";
+		};
+		620CCD3A1F1F962700139915 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				620CCD1F1F1E29CD00139915 /* Assets.xcassets */,
+				620CCD211F1E29CD00139915 /* LaunchScreen.storyboard */,
+				620CCD1C1F1E29CD00139915 /* Main.storyboard */,
+			);
+			name = Views;
 			sourceTree = "<group>";
 		};
 		74A46F0C4F04A5F7362CA00A /* Frameworks */ = {
@@ -246,6 +257,7 @@
 				620CCD371F1F842800139915 /* CategoriesTableViewController.swift in Sources */,
 				620CCD2D1F1E2D0600139915 /* PostsTableViewController.swift in Sources */,
 				620CCD351F1F7F8800139915 /* PHCategory.swift in Sources */,
+				629671501F1FAA5300508080 /* GIF.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,6 +9,8 @@
 import UIKit
 import SwiftyJSON
 
+private let developerToken = "591f99547f569b05ba7d8777e2e0824eea16c440292cce1f8dfb3952cc9937ff"
+
 class PostsTableViewController: UITableViewController, CategoriesTableViewControllerDelegate {
     
     let cellReuseID = "cellid"
@@ -17,10 +19,12 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
     var passPost : PHPost?
     var categories = [PHCategory]()
     var category = PHCategory(name: "Tech", slug: "tech")
+    var activityIndicator = UIActivityIndicatorView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //refresh control setup
         refreshControl = UIRefreshControl()
         self.refreshControl?.addTarget(self, action: #selector(refresh), for: UIControlEvents.valueChanged)
         tableView.addSubview(refreshControl!)
@@ -34,6 +38,13 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
         button.addTarget(self, action: #selector(self.clickOnButton), for: .touchUpInside)
         self.navigationItem.titleView = button
         
+        //activity indicator setup
+        activityIndicator.center = self.view.center
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.activityIndicatorViewStyle = .gray
+        self.view.addSubview(activityIndicator)
+        
+        activityIndicator.startAnimating()
         getCatigories()
         getPostForCategory(category.slug)
     }
@@ -41,12 +52,11 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         
-        self.imageCache.removeAll()
+        imageCache.removeAll()
     }
     
     func refresh() {
         getPostForCategory(category.slug)
-        self.refreshControl?.endRefreshing()
     }
     
     func clickOnButton(button: UIButton) {
@@ -58,6 +68,7 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
     func categoryChanged(category: PHCategory) {
         (self.navigationItem.titleView as! UIButton).setTitle(category.name, for: .normal)
         self.category = category
+        activityIndicator.startAnimating()
         self.refresh()
     }
     
@@ -73,8 +84,7 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
         
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer 591f99547f569b05ba7d8777e2e0824eea16c440292cce1f8dfb3952cc9937ff",
-                         forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
         request.setValue("api.producthunt.com", forHTTPHeaderField: "Host")
         
         let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
@@ -84,11 +94,14 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
                 for post in json["posts"].arrayValue {
                     array.append(PHPost(response: post))
                 }
+            } else {
+                print(error ?? "no data")
             }
-            print(error ?? "no error")
             DispatchQueue.main.async {
                 self.postsArray = array
                 self.tableView.reloadData()
+                self.activityIndicator.stopAnimating()
+                self.refreshControl?.endRefreshing()
             }
         }
         task.resume()
@@ -103,8 +116,7 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
         
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer 591f99547f569b05ba7d8777e2e0824eea16c440292cce1f8dfb3952cc9937ff",
-                         forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
         request.setValue("api.producthunt.com", forHTTPHeaderField: "Host")
         
         let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
@@ -112,13 +124,10 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
                 let json = JSON(data!)
                 //print(json["posts"].arrayValue)
                 for post in json["categories"].arrayValue {
-                    print(post["name"].stringValue)
                     self.categories.append(PHCategory(response: post))
                 }
-            }
-            print(error ?? "no error")
-            DispatchQueue.main.async {
-
+            } else {
+                print(error ?? "no data")
             }
         }
         task.resume()
@@ -139,25 +148,25 @@ class PostsTableViewController: UITableViewController, CategoriesTableViewContro
         let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseID, for: indexPath) as! PHPostCell
         cell.post = postsArray[indexPath.row]
         
-        //TODO gif support would be fine too
         if let img = imageCache[cell.post!.thumbnailURL!] {
             
             cell.thumbnailView.image = img
             
         } else {
             
-            URLSession.shared.dataTask(with: cell.post!.thumbnailURL!) { (data, response, error) in
+                URLSession.shared.dataTask(with: cell.post!.thumbnailURL!) { (data, response, error) in
                 var image = UIImage()
                 
                 if error == nil && data != nil {
                     image = UIImage(data: data!)!
-                    self.imageCache[cell.post!.thumbnailURL!] = image
                 } else {
                     print(error?.localizedDescription ?? "Error")
                 }
                 
                 DispatchQueue.main.async() { () -> Void in
                     if self.tableView.cellForRow(at: indexPath) != nil {
+                        self.imageCache[cell.post!.thumbnailURL!] = image
+                        //image = UIImage.animatedImage(data: data!)! //gifs really memory unafficiant
                         cell.thumbnailView.image = image
                     }
                 }
@@ -198,8 +207,8 @@ class PHPostCell: UITableViewCell {
     
     var post : PHPost? {
         didSet {
-            self.titleLabel.text = (post?.name) ?? "nil"
-            self.descriptionLabel.text = (post?.description) ?? "nil"
+            self.titleLabel.text = post!.name
+            self.descriptionLabel.text = post!.description
             self.upvotesLabel.text = "▲\(post!.votesCount)"
             
             self.thumbnailView.image = UIImage(named: "blank.png")
